@@ -1,0 +1,183 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "title": "k6 — BlazeDemo Performance",
+  "uid": "k6-blazedemo",
+  "schemaVersion": 39,
+  "tags": ["k6", "performance", "blazedemo"],
+  "time": { "from": "now-15m", "to": "now" },
+  "refresh": "5s",
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Requisições por segundo (RPS)",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 250 }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT count(\"value\") FROM \"http_reqs\" WHERE $timeFilter GROUP BY time(1s) fill(0)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p90 do tempo de resposta",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 2000 }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT percentile(\"value\", 90) FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time(5s) fill(null)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Taxa de erro HTTP",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0.01 }
+            ]
+          }
+        }
+      },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT mean(\"value\") FROM \"http_req_failed\" WHERE $timeFilter GROUP BY time(5s) fill(0)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Virtual Users (VUs)",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT max(\"value\") FROM \"vus\" WHERE $timeFilter GROUP BY time(5s) fill(null)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tempo de resposta HTTP (avg / p90 / p95)",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 6 },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT mean(\"value\") AS \"avg\" FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time(5s) fill(null)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "B",
+          "query": "SELECT percentile(\"value\", 90) AS \"p90\" FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time(5s) fill(null)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "C",
+          "query": "SELECT percentile(\"value\", 95) AS \"p95\" FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time(5s) fill(null)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Vazão — Requisições por segundo",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 6 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 20 } } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT count(\"value\") FROM \"http_reqs\" WHERE $timeFilter GROUP BY time(1s) fill(0)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Virtual Users ao longo do tempo",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT max(\"value\") FROM \"vus\" WHERE $timeFilter GROUP BY time(5s) fill(null)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Compras concluídas com sucesso (taxa)",
+      "datasource": { "type": "influxdb", "uid": "InfluxDB-k6" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "SELECT mean(\"value\") FROM \"purchase_success\" WHERE $timeFilter GROUP BY time(5s) fill(null)",
+          "rawQuery": true,
+          "resultFormat": "time_series"
+        }
+      ]
+    }
+  ]
+}
