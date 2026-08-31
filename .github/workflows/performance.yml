@@ -1,8 +1,5 @@
 name: k6 Performance Tests
 
-# Execução manual (workflow_dispatch) e em pushes na branch principal.
-# O teste de carga é pesado; por padrão rodamos o smoke automaticamente e
-# deixamos load/spike como escolha explícita na execução manual.
 on:
   push:
     branches: [main, master]

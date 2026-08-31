@@ -1,12 +1,3 @@
-/**
- * Teste de SMOKE.
- *
- * Objetivo: validar rapidamente que o fluxo de compra funciona ponta a ponta
- * antes de investir em cargas maiores. Usa 1 VU por poucas iterações.
- *
- * Execução:
- *   k6 run src/tests/smoke.test.js
- */
 import { sleep } from 'k6';
 
 import { runPurchaseFlow } from '../flows/purchaseFlow.js';
