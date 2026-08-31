@@ -2,7 +2,7 @@
 
 Automação de **testes de performance** para o fluxo de **compra de passagem aérea** da aplicação [BlazeDemo](https://www.blazedemo.com), implementada com o framework [k6](https://k6.io/) em **JavaScript**.
 
-O projeto entrega um **teste de carga** e um **teste de pico** desenhados para validar o critério de aceitação do desafio, com relatórios visuais em HTML, thresholds automatizados e pipeline de CI.
+O projeto entrega um **teste de carga** e um **teste de pico** desenhados para validar o critério de aceitação do desafio, com relatórios visuais (HTML estático **e** dashboard Grafana opcional), thresholds automatizados e pipeline de CI.
 
 ---
 
@@ -69,7 +69,13 @@ qa-automation-challenge-performance/
 │       ├── smoke.test.js        # Validação rápida do fluxo
 │       ├── load.test.js         # Teste de carga (250 req/s)
 │       └── spike.test.js        # Teste de pico
-├── reports/                     # Saída dos relatórios (gerada em runtime)
+├── docker/                      # Stack opcional de dashboard (Grafana + InfluxDB)
+│   ├── docker-compose.yml       # Orquestra InfluxDB + Grafana
+│   └── grafana/
+│       ├── provisioning/        # Data source e dashboards provisionados
+│       └── dashboards/          # Dashboard k6 pré-configurado (JSON)
+├── reports/                     # Relatórios gerados em runtime
+│   └── evidence/                # Relatórios de evidência versionados no repositório
 ├── .github/workflows/
 │   └── performance.yml          # Pipeline de CI (GitHub Actions)
 ├── package.json                 # Scripts de execução multiplataforma
@@ -83,7 +89,7 @@ qa-automation-challenge-performance/
 - **Single Responsibility** — cada módulo tem um propósito único.
 - **DRY** — o fluxo de compra é escrito uma vez e reaproveitado pelos três cenários.
 - **Configuração externalizada** — URL, ambiente e limites vêm de variáveis de ambiente (sem valores fixos espalhados).
-- **Legibilidade** — nomes descritivos, comentários explicando o *porquê*, e checks funcionais em cada etapa.
+- **Legibilidade** — nomes descritivos e autoexplicativos, checks funcionais em cada etapa e código enxuto sem ruído.
 
 ---
 
@@ -192,13 +198,16 @@ k6 run -e BASE_URL=https://staging.exemplo.com src/tests/load.test.js
 
 ## Relatórios
 
-Ao final de cada execução são gerados automaticamente, na pasta `reports/`:
+O projeto oferece **duas formas de visualizar os resultados**, pensadas para diferentes cenários do avaliador.
+
+### Opção 1 — Relatório HTML (padrão, sem dependências)
+
+É a forma recomendada e **não exige nada além do k6**. Ao final de cada execução são gerados automaticamente na pasta `reports/`:
 
 - **`<cenário>-report.html`** — relatório **visual** e conciso, com gráficos e o status de cada threshold (verde/vermelho). Abra no navegador.
-- **`<cenário>-summary.json`** — resumo completo em JSON, para inspeção programática ou integração com dashboards.
+- **`<cenário>-summary.json`** — resumo completo em JSON, para inspeção programática.
 - **Resumo no terminal** — visão rápida imediata ao término do teste.
 
-Exemplo:
 ```
 reports/
 ├── load-report.html
@@ -206,6 +215,38 @@ reports/
 ├── spike-report.html
 └── spike-summary.json
 ```
+
+A pasta de saída é configurável pela variável `REPORT_DIR` (padrão: `reports`). Para salvar como evidência versionada no repositório:
+
+```bash
+k6 run -e REPORT_DIR=reports/evidence src/tests/load.test.js
+```
+
+> Os relatórios gerados na raiz de `reports/` são ignorados pelo Git (ruído de execução local). Apenas os arquivos em **`reports/evidence/`** são versionados, servindo como evidência oficial da execução.
+
+### Opção 2 — Dashboard Grafana + InfluxDB (opcional, requer Docker)
+
+Para uma experiência visual **ao vivo**, com gráficos de séries temporais (latência, vazão e erros ao longo do tempo), o projeto inclui uma stack pronta em `docker/`. Tudo já vem provisionado — data source e dashboard são configurados automaticamente, **sem cliques manuais no Grafana**.
+
+**Pré-requisito:** [Docker](https://docs.docker.com/get-docker/) instalado (com Docker Compose v2).
+
+```bash
+# 1. Subir InfluxDB + Grafana
+npm run grafana:up
+
+# 2. Rodar um teste enviando as métricas ao InfluxDB
+npm run test:load:grafana     # ou test:smoke:grafana / test:spike:grafana
+
+# 3. Abrir o dashboard no navegador
+#    http://localhost:3000  ->  pasta "Performance"  ->  "k6 — BlazeDemo Performance"
+
+# 4. Ao terminar, derrubar a stack
+npm run grafana:down          # (ou grafana:reset para apagar também os dados)
+```
+
+O dashboard já traz os indicadores do critério de aceitação em destaque: **RPS**, **p90** (com alerta visual acima de 2s), **taxa de erro**, **VUs** e a taxa de **compras concluídas**.
+
+> Se o avaliador **não tiver Docker**, basta usar a Opção 1 — ela cobre 100% do requisito de relatório do desafio sem instalar nada além do k6.
 
 ---
 
@@ -260,9 +301,10 @@ Isso garante que o código seja **executável na máquina do avaliador** e tamb�
 ## Considerações finais
 
 - **Multiplataforma:** roda em Windows, Linux e macOS — o único requisito é ter o k6 instalado.
-- **Sem valores fixos:** URL e ambiente são configuráveis por variável de ambiente.
+- **Relatório em camadas:** HTML estático (sem dependências) garante que o avaliador veja os resultados; o dashboard Grafana via Docker é um extra opcional para quem quer a visão ao vivo.
+- **Sem valores fixos:** URL, ambiente e pasta de relatório são configuráveis por variável de ambiente.
 - **Fidelidade ao usuário real:** o fluxo extrai um voo real da lista em vez de enviar dados fixos.
 - **Critérios como código:** os thresholds fazem o teste falhar automaticamente se o critério de aceitação for violado, tornando o resultado objetivo e auditável.
 - **Escalável:** novos cenários (stress, soak/endurance) podem reaproveitar `purchaseFlow.js` sem duplicação.
 
-**Tecnologias:** k6 · JavaScript (ES Modules) · GitHub Actions
+**Tecnologias:** k6 · JavaScript (ES Modules) · Grafana · InfluxDB · Docker · GitHub Actions
