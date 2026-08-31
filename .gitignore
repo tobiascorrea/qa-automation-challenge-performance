@@ -1,0 +1,20 @@
+# Dependências
+node_modules/
+
+# Relatórios gerados em runtime (mantemos apenas exemplos versionados, se houver)
+reports/*.html
+reports/*.json
+!reports/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/
+.vscode/
+*.swp
