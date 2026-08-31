@@ -1,0 +1,62 @@
+name: k6 Performance Tests
+
+# Execução manual (workflow_dispatch) e em pushes na branch principal.
+# O teste de carga é pesado; por padrão rodamos o smoke automaticamente e
+# deixamos load/spike como escolha explícita na execução manual.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Cenário a executar'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - load
+          - spike
+          - all
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Definir cenário
+        id: scenario
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.scenario }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=smoke" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Executar smoke
+        if: steps.scenario.outputs.value == 'smoke'
+        run: k6 run src/tests/smoke.test.js
+
+      - name: Executar teste de carga
+        if: steps.scenario.outputs.value == 'load' || steps.scenario.outputs.value == 'all'
+        run: k6 run src/tests/load.test.js
+
+      - name: Executar teste de pico
+        if: steps.scenario.outputs.value == 'spike' || steps.scenario.outputs.value == 'all'
+        run: k6 run src/tests/spike.test.js
+
+      - name: Publicar relatórios como artefato
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-reports
+          path: reports/
+          if-no-files-found: ignore
