@@ -2,7 +2,7 @@ import { runPurchaseFlow } from '../flows/purchaseFlow.js';
 import { loadThresholds } from '../config/thresholds.js';
 import { buildSummaryHandler } from '../lib/reporter.js';
 
-const TARGET_ITERATIONS_PER_SECOND = 63;
+const TARGET_ITERATIONS_PER_SECOND = 64;
 
 export const options = {
   scenarios: {
