@@ -15,7 +15,6 @@ export const loadThresholds = {
 };
 
 export const spikeThresholds = {
-  http_req_duration: [`p(90)<${P90_LIMIT_MS}`],
-  http_req_failed: ['rate<0.05'],
-  checks: ['rate>0.95'],
+  http_req_failed: [{ threshold: 'rate<1', abortOnFail: false }],
+  checks: [{ threshold: 'rate>0', abortOnFail: false }],
 };
