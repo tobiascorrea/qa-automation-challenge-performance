@@ -1,10 +1,12 @@
 # Dependências
 node_modules/
 
-# Relatórios gerados em runtime (mantemos apenas exemplos versionados, se houver)
+# Relatórios gerados em execuções locais (ruído) — NÃO versionados.
+# Evidências oficiais ficam em reports/evidence/ e SÃO versionadas (ver exceção abaixo).
 reports/*.html
 reports/*.json
 !reports/.gitkeep
+!reports/evidence/
 
 # Logs
 *.log

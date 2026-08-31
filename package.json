@@ -1,13 +1,19 @@
 {
   "name": "qa-automation-challenge-performance",
-  "version": "1.0.0",
-  "description": "Teste de performance do fluxo de compra de passagem do BlazeDemo usando k6 (JavaScript). Contém testes de carga e pico com relatório visual.",
+  "version": "1.1.0",
+  "description": "Teste de performance do fluxo de compra de passagem do BlazeDemo usando k6 (JavaScript). Contém testes de carga e pico com relatório HTML e dashboard Grafana.",
   "type": "module",
   "scripts": {
     "test:smoke": "k6 run src/tests/smoke.test.js",
     "test:load": "k6 run src/tests/load.test.js",
     "test:spike": "k6 run src/tests/spike.test.js",
     "test:all": "npm run test:load && npm run test:spike",
+    "test:smoke:grafana": "k6 run --out influxdb=http://localhost:8086/k6 src/tests/smoke.test.js",
+    "test:load:grafana": "k6 run --out influxdb=http://localhost:8086/k6 src/tests/load.test.js",
+    "test:spike:grafana": "k6 run --out influxdb=http://localhost:8086/k6 src/tests/spike.test.js",
+    "grafana:up": "docker compose -f docker/docker-compose.yml up -d",
+    "grafana:down": "docker compose -f docker/docker-compose.yml down",
+    "grafana:reset": "docker compose -f docker/docker-compose.yml down -v",
     "clean:reports": "node -e \"const fs=require('fs');fs.rmSync('reports',{recursive:true,force:true});fs.mkdirSync('reports')\""
   },
   "keywords": [
@@ -17,7 +23,9 @@
     "spike-testing",
     "qa",
     "blazedemo",
-    "javascript"
+    "javascript",
+    "grafana",
+    "influxdb"
   ],
   "author": "",
   "license": "MIT",
