@@ -1,11 +1,3 @@
-/**
- * Massa de dados do teste.
- *
- * Mantém os dados de entrada separados da lógica de execução, facilitando a
- * variação de cenários sem tocar no código dos fluxos.
- */
-
-/** Cidades de origem disponíveis no formulário do BlazeDemo. */
 export const departureCities = [
   'Paris',
   'Philadelphia',
@@ -16,7 +8,6 @@ export const departureCities = [
   'São Paolo',
 ];
 
-/** Cidades de destino disponíveis no formulário do BlazeDemo. */
 export const destinationCities = [
   'Buenos Aires',
   'Rome',
@@ -27,10 +18,6 @@ export const destinationCities = [
   'Cairo',
 ];
 
-/**
- * Dados de pagamento fictícios. O BlazeDemo é uma aplicação de demonstração e
- * não processa pagamentos reais; usamos valores de placeholder padronizados.
- */
 export const paymentProfile = {
   inputName: 'QA Performance',
   address: '123 Test Street',
@@ -45,7 +32,6 @@ export const paymentProfile = {
   rememberMe: 'on',
 };
 
-/** Retorna um elemento aleatório de um array. */
 export function pickRandom(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
