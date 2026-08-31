@@ -158,7 +158,7 @@ k6 version
 ### 2. Clonar o repositório
 
 ```bash
-git clone <URL_DO_SEU_REPOSITORIO>
+git clone https://github.com/tobiascorrea/qa-automation-challenge-performance.git
 cd qa-automation-challenge-performance
 ```
 
